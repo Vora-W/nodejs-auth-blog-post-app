@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const AuthContext = React.createContext();
 
@@ -9,24 +10,55 @@ function AuthProvider(props) {
     user: null,
   });
 
-  const login = () => {
-    // 🐨 Todo: Exercise #4
-    //  ให้เขียน Logic ของ Function `login` ตรงนี้
-    //  Function `login` ทำหน้าที่สร้าง Request ไปที่ API POST /login
-    //  ที่สร้างไว้ด้านบนพร้อมกับ Body ที่กำหนดไว้ในตารางที่ออกแบบไว้
+  const login = async (username, password) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/auth/login",
+        { username, password }
+      );
+      const { token, user } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      setState({ ...state, loading: false, user, error: null });
+    } catch (error) {
+      console.error(error);
+      setState({
+        ...state,
+        loading: false,
+        error: error.response?.data?.message || "Invalid username or password",
+      });
+      throw error;
+    }
   };
 
-  const register = () => {
-    // 🐨 Todo: Exercise #2
-    //  ให้เขียน Logic ของ Function `register` ตรงนี้
-    //  Function register ทำหน้าที่สร้าง Request ไปที่ API POST /register
-    //  ที่สร้างไว้ด้านบนพร้อมกับ Body ที่กำหนดไว้ในตารางที่ออกแบบไว้
+  const register = async (username, password, firstName, lastName) => {
+    // Function register ทำหน้าที่สร้าง Request ไปที่ API POST /auth/register
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/auth/register",
+        {
+          username,
+          password,
+          firstName,
+          lastName,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      setState({
+        ...state,
+        error: error.response?.data?.message || "Register failed",
+      });
+      throw error;
+    }
   };
 
   const logout = () => {
-    // 🐨 Todo: Exercise #7
-    //  ให้เขียน Logic ของ Function `logout` ตรงนี้
-    //  Function logout ทำหน้าที่ในการลบ JWT Token ออกจาก Local Storage
+    // Function logout ทำหน้าที่ในการลบ JWT Token ออกจาก Local Storage
+    localStorage.removeItem("token");
+    setState({ ...state, user: null });
   };
 
   const isAuthenticated = Boolean(localStorage.getItem("token"));

@@ -1,11 +1,41 @@
 import { ObjectId } from "mongodb";
 import { Router } from "express";
 import { db } from "../utils/db.js";
+import { protect } from "../middlewares/protect.js";
+import { posts as seedPosts } from "../data/posts.js";
 
 const postRouter = Router();
 
 // 🐨 Todo: Exercise #5
 // นำ Middleware `protect` มาใช้กับ `postRouter` ด้วย Function `app.use`
+postRouter.use(protect);
+
+// 🐨 Seed ข้อมูลเริ่มต้นจาก server/data/posts.js เข้าสู่ MongoDB
+async function seedInitialPosts() {
+  const collection = db.collection("posts");
+  const count = await collection.countDocuments();
+  if (count > 0) {
+    return;
+  }
+
+  const now = new Date();
+  const docs = seedPosts.map((post) => ({
+    title: post.title,
+    content: post.content,
+    status: "published",
+    likes: post.likes,
+    created_at: now,
+    updated_at: now,
+    published_at: now,
+  }));
+
+  await collection.insertMany(docs);
+}
+
+// เรียก seed ตอนโหลดโมดูล (จะทำงานครั้งเดียวตอน server start)
+seedInitialPosts().catch((err) => {
+  console.error("Failed to seed initial posts:", err);
+});
 
 postRouter.get("/", async (req, res) => {
   const status = req.query.status;

@@ -1,15 +1,26 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/authentication";
 
 function RegisterPage() {
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // 🐨 Todo: Exercise #2
     // นำ Function `register` ใน AuthContext มา Execute ใน Event Handler ตรงนี้
+    register(username, password, firstName, lastName)
+      .then(() => {
+        // ถ้าสมัครสำเร็จ ให้ไปหน้า login
+        navigate("/login");
+      })
+      .catch(() => {
+        // error จะถูกจัดการใน context แล้ว (state.error)
+      });
   };
 
   return (
