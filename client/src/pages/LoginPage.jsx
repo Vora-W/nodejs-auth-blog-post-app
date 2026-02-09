@@ -10,7 +10,7 @@ function LoginPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    login(username, password)
+    login(username, password) //execute login function in AuthContext
       .then(() => {
         // เมื่อ Login สำเร็จ ให้ไปที่หน้า Home Page
         navigate("/");

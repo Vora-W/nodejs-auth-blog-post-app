@@ -11,7 +11,7 @@ export const protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ "message": "Token has invalid format" });
   }
 
   const token = authHeader.split(" ")[1];
@@ -20,9 +20,9 @@ export const protect = (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     // เก็บข้อมูล user จาก token ไว้ใน req.user เผื่อใช้ต่อ
     req.user = decoded.user || null;
-    next();
+    next(); //execute next middleware or go tocontroller function
   } catch (error) {
     console.error(error);
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ "message": "Token is invalid" });
   }
 };

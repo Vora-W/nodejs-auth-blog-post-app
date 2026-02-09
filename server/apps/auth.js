@@ -48,29 +48,27 @@ authRouter.post("/register", async (req, res) => {
 // ให้สร้าง API เพื่อเอาไว้ Login ตัว User ตามตารางที่ออกแบบไว้
 authRouter.post("/login", async (req, res) => {
     try {
-        const { username, password } = req.body;
-
         // 1. validate input
-        if (!username || !password) {
+        if (!req.body.username || !req.body.password) {
             return res.status(400).json({ message: "กรอกข้อมูลไม่ครบ" });
         }
 
         const usersCollection = db.collection("users");
 
         // 2. ตรวจสอบ Username ว่ามีใน Database หรือไม่
-        const user = await usersCollection.findOne({ username });
+        const user = await usersCollection.findOne({ username: req.body.username });
         if (!user) {
             return res
-                .status(401)
-                .json({ message: "Invalid username or password" });
+                .status(400)
+                .json({ message: "ชื่อผู้ใช้งานไม่ถูกต้อง" });
         }
 
         // 3. ตรวจสอบ Password ว่าถูกต้องหรือไม่ (ใช้ bcrypt.compare)
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
         if (!isPasswordValid) {
             return res
-                .status(401)
-                .json({ message: "Invalid username or password" });
+                .status(400)
+                .json({ message: "รหัสผ่านไม่ถูกต้อง" });
         }
 
         // 4. เมื่อผ่านการตรวจสอบข้อมูลแล้วให้ใช้ jwt.sign เพื่อสร้าง Token
@@ -87,13 +85,9 @@ authRouter.post("/login", async (req, res) => {
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 
         return res.json({
+            message: "Login successful",
             token,
-            user: {
-                id: user._id,
-                username: user.username,
-                firstName: user.firstName,
-                lastName: user.lastName,
-            },
+            user: payload.user,
         });
     } catch (error) {
         console.error(error);

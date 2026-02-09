@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = React.createContext();
 
@@ -16,11 +17,13 @@ function AuthProvider(props) {
         "http://localhost:4000/auth/login",
         { username, password }
       );
-      const { token, user } = response.data;
+      const { token } = response.data;
       if (token) {
         localStorage.setItem("token", token);
+        const decoded = jwtDecode(token);
+        const user = decoded.user; // { id, firstName, lastName } แนบมาใน Token
+        setState({ ...state, loading: false, user, error: null });
       }
-      setState({ ...state, loading: false, user, error: null });
     } catch (error) {
       console.error(error);
       setState({

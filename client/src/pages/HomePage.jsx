@@ -32,7 +32,7 @@ function HomePage() {
         {/* ใช้ logout จาก AuthContext แล้วพากลับหน้า Login */}
         <button
           onClick={() => {
-            logout();
+            logout(); //execute logout function in AuthContext
             navigate("/login");
           }}
         >
